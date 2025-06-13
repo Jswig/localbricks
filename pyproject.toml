@@ -1,0 +1,25 @@
+[project]
+name = "localbricks"
+version = "0.0.1"
+description = "Write code that works the same on Databricks and locally"
+readme = "README.md"
+authors = [
+    { name = "Anders Poirel", email = "contact@anderspoirel.net" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "databricks-sdk>=0.36",
+]
+
+[project.optional-dependencies]
+connect = ["databricks-connect>=13"]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.16.0",
+    "pytest>=8.4.0",
+]
+
+[build-system]
+requires = ["flit_core>=3.2,<4"]
+build-backend = "flit_core.buildapi"
