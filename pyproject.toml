@@ -1,7 +1,7 @@
 [project]
 name = "localbricks"
-version = "0.0.1"
-description = "Write code that works the same on Databricks and locally"
+dynamic = ["version"]
+description = "Write code that works the same locally and in Databricks"
 readme = "README.md"
 authors = [
     { name = "Anders Poirel", email = "contact@anderspoirel.net" }
