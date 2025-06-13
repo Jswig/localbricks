@@ -1,7 +1,7 @@
 [project]
 name = "localbricks"
-version = "0.0.1"
-description = "Write code that works the same on Databricks and locally"
+dynamic = ["version"]
+description = "Write code that works the same locally and in Databricks"
 readme = "README.md"
 authors = [
     { name = "Anders Poirel", email = "contact@anderspoirel.net" }
@@ -18,8 +18,9 @@ connect = ["databricks-connect>=13"]
 dev = [
     "mypy>=1.16.0",
     "pytest>=8.4.0",
+    "ruff>=0.11.13",
 ]
 
 [build-system]
-requires = ["flit_core>=3.2,<4"]
+requires = ["flit_core>=3.2"]
 build-backend = "flit_core.buildapi"
