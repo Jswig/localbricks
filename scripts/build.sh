@@ -4,7 +4,7 @@ set -ex
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
 
-uv sync --group dev
+uv sync --extra connect --group dev
 echo "Formatting..."
 uv run ruff format "${REPO_ROOT}"
 echo "Linting..."
