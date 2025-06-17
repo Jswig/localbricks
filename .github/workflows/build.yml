@@ -1,0 +1,25 @@
+name: "Build"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: "ubuntu-24.04"
+    steps:
+      - uses: "actions/checkout@v4"
+      - name: "setup uv"
+        uses: "astral-sh/setup-uv@v5"
+      - name: "setup python"
+        # use the built-in Python setup action instead of uv since it's faster due to
+        # runner caching
+        uses: "actions/setup-python@v5"
+        with:
+          python-version-file: ".python-version"
+      - name: "build"
+        run: |
+          chmod +x scripts/build.sh
+          ./scripts/build.sh
