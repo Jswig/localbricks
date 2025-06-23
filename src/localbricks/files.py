@@ -1,7 +1,7 @@
 import os
 import io
 from contextlib import contextmanager
-from typing import Generator, IO
+from typing import Generator, IO, cast
 
 import databricks.sdk
 
@@ -10,7 +10,7 @@ from .platform import is_databricks_driver
 
 def _validate_mode(mode: str) -> None:
     """Validate file mode string.
-    
+
     :param mode: Mode string to validate
     :raises ValueError: If mode is invalid
     """
@@ -53,7 +53,10 @@ def open_file(
 ) -> Generator[IO, None, None]:
     """Provides a file-like interface to a file in the Databricks Workspace.
 
-    This aims to emulate the built-in 'open()' function.
+    This aims to emulate the built-in 'open()' function. When running against a remote
+    Databricks workspace, a few limitations need to be considered:
+    - files are loaded entirely into memory
+    - writes are buffered and uploaded only on context exit
 
     :param file: Path to the file to open
     :param mode: File mode ('r', 'w', 'a', 'r+', 'w+', 'a+', with optional 'b' for binary)
@@ -77,14 +80,17 @@ def open_file(
         if client is None:
             client = databricks.sdk.WorkspaceClient()
 
-        is_binary_mode = 'b' in mode
-        is_read_mode = 'r' in mode
-        is_write_mode = 'w' in mode
-        is_update_mode = '+' in mode
+        file_path = str(file)
+        is_binary_mode = "b" in mode
+        is_read_mode = "r" in mode
+        is_write_mode = "w" in mode
+        is_update_mode = "+" in mode
 
         if is_read_mode or is_update_mode:
             # Download existing file content
-            response = client.files.download(file)   
+            response = client.files.download(file_path)
+            if response.contents is None:
+                raise ValueError(f"No contents for {file_path}")
             if is_binary_mode:
                 opened_file = response.contents
             else:
@@ -95,18 +101,22 @@ def open_file(
             if is_binary_mode:
                 opened_file = io.BytesIO()
             else:
-                opened_file = io.TextIO()
+                opened_file = io.StringIO()
 
         try:
             yield opened_file
 
             if is_write_mode or is_update_mode:
                 if is_binary_mode:
+                    # TODO: these type casts are not very elegant, it may be cleaner to
+                    # satisfy mypy by using a separate function for each type of content
+                    opened_file = cast(io.BytesIO, opened_file)
                     upload_contents = opened_file
                 else:
+                    opened_file = cast(io.StringIO, opened_file)
                     upload_contents = io.BytesIO(
                         opened_file.getvalue().encode(encoding)
                     )
-                client.files.upload(file, upload_contents, overwrite=True)
+                client.files.upload(file_path, upload_contents, overwrite=True)
         finally:
             opened_file.close()
