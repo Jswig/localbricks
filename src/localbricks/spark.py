@@ -21,12 +21,23 @@ else:
 from .platform import is_databricks_driver
 
 
-# On a Databricks cluster driver in Standard access mode (a.k.a shared) and on
-# Serveless Databrickscompute, the global 'spark' variable is a Spark Connect session.
-# In Dedicated access mode (a.k.a. single user), 'spark' is a regular Spark session.
-# Finally, a session created through Databricks Connect will always be a Spark Connect
-# session.
+# On a Databricks cluster driver in Standard access mode (a.k.a. Shared) and on
+# Serveless Databrickscompute, 'getOrCreate' returns the already-existing Spark Connect
+# session. In Dedicated access mode (a.k.a. Single User), 'getOrCreate' returns the
+# already-existing regular Spark session. Finally, a session created through Databricks
+# Connect will always be a Spark Connect session.
 def get_spark_session() -> SparkSession | SparkConnectSession:
+    """Get a Spark Session, using the appropriate method based on the environment.
+
+    When running in Databricks, this returns the already-existing Spark Session that is
+    created by the runtime on startup. When running outside of Databricks, this attempts
+    to create a new Session using Databricks Connect and the automatically inferred
+    authentication method.
+
+    :returns: a Spark Session. This can be a regular Spark Session or a Spark Connect
+        Session, depending on the context.
+    """
+
     if is_databricks_driver():
         return SparkSession.builder.getOrCreate()
     elif _databricks_connect_available:
