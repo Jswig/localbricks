@@ -97,15 +97,16 @@ def open_file(
             else:
                 opened_file = io.TextIO()
 
-            try:
-                yield opened_file
-                if is_write_mode or is_update_mode:
-                    if is_binary_mode:
-                        upload_contents = opened_file
-                    else:
-                        upload_contents = io.BytesIO(
-                            opened_file.getvalue().encode(encoding)
-                        )
-                    client.files.upload(file, upload_contents, overwrite=True)
-            finally:
-                opened_file.close()
+        try:
+            yield opened_file
+
+            if is_write_mode or is_update_mode:
+                if is_binary_mode:
+                    upload_contents = opened_file
+                else:
+                    upload_contents = io.BytesIO(
+                        opened_file.getvalue().encode(encoding)
+                    )
+                client.files.upload(file, upload_contents, overwrite=True)
+        finally:
+            opened_file.close()
