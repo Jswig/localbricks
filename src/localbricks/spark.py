@@ -12,7 +12,7 @@ if (
 ):
     _databricks_connect_available = True
     # I haven't found a good way to type this import when regular pyspark is installed
-    # as a dev-dependency, but it's not necessary for providint accurate return types.
+    # as a dev-dependency, but it's not necessary for providing accurate return types.
     # TODO: find a better way to handle this.
     from databricks.connect import DatabricksSession  # type: ignore
 else:
@@ -22,10 +22,10 @@ from .platform import is_databricks_driver
 
 
 # On a Databricks cluster driver in Standard access mode (a.k.a. Shared) and on
-# Serveless Databrickscompute, 'getOrCreate' returns the already-existing Spark Connect
-# session. In Dedicated access mode (a.k.a. Single User), 'getOrCreate' returns the
-# already-existing regular Spark session. Finally, a session created through Databricks
-# Connect will always be a Spark Connect session.
+# Serverless Databricks compute, 'getOrCreate' returns the already-existing Spark
+# Connect session. In Dedicated access mode (a.k.a. Single User), 'getOrCreate'
+# returns the already-existing regular Spark session. Finally, a session created
+# through Databricks Connect will always be a Spark Connect session.
 def get_spark_session() -> SparkSession | SparkConnectSession:
     """Get a Spark Session, using the appropriate method based on the environment.
 
