@@ -18,7 +18,18 @@ connect = ["databricks-connect>=13"]
 dev = [
     "mypy>=1.16.0",
     "pytest>=8.4.0",
+    # we want regular Spark for unit tests, but in we don't want to install when 
+    # running on a Databricks cluster since it would interfere with the runtime's Spark.
+    "pyspark[connect]==3.5.5",
     "ruff>=0.11.13",
+    # pyspark.sql.connect used 'distutils' for a Pandas version check. In Python 3.12+
+    # where distutils is removed from the standard library, use the version provided
+    # by 'setuptools' instead. TODO: remove this once this is fixed in Spark release.
+    'setuptools; python_version >= "3.12"',
+]
+
+interactive = [
+    "ipython>=8.19.0",
 ]
 
 [build-system]
