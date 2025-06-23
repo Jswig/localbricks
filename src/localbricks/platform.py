@@ -9,6 +9,6 @@ def is_databricks_driver() -> bool:
     :returns: True if the current Python process is running on a Databricks driver,
     False otherwise.
     """
-    # DATABRICKS_RUNTIME_VERSION is always set on driver nodes, but not on worker nodes
-    # It also should not be set on non-Databricks environments
+    # DATABRICKS_RUNTIME_VERSION is always set on Databricks driver nodes, but not on
+    # worker nodes, so we can reliably use it to check if we are on a Databricks driver.
     return os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None
