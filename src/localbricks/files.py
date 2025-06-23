@@ -1,56 +1,11 @@
 import os
 import io
 from contextlib import contextmanager
-from typing import Generator, IO, Union, Optional
+from typing import Generator, IO
 
 import databricks.sdk
-from databricks.sdk.core import DatabricksError
 
 from .platform import is_databricks_driver
-
-
-class StreamingFileReader:
-    """A file-like object that streams content from Databricks Files API."""
-    
-    def __init__(self, client: databricks.sdk.WorkspaceClient, file_path: str, encoding: str = "utf-8"):
-        self.client = client
-        self.file_path = file_path
-        self.encoding = encoding
-        self._response = None
-        self._buffer = None
-        self._position = 0
-        
-    def __enter__(self):
-        self._response = self.client.files.download(self.file_path)
-        self._buffer = self._response.contents
-        return self
-        
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self._response:
-            self._response.contents.close()
-            
-    def read(self, size: Optional[int] = None) -> str:
-        """Read content from the file."""
-        if self._buffer is None:
-            raise ValueError("File not opened")
-            
-        content = self._buffer.read(size)
-        self._position += len(content)
-        return content.decode(self.encoding)
-        
-    def readline(self) -> str:
-        """Read a single line from the file."""
-        if self._buffer is None:
-            raise ValueError("File not opened")
-            
-        line = self._buffer.readline()
-        self._position += len(line)
-        return line.decode(self.encoding)
-        
-    def close(self):
-        """Close the file."""
-        if self._response:
-            self._response.contents.close()
 
 
 def _validate_mode(mode: str) -> None:
