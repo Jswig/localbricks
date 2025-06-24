@@ -15,7 +15,7 @@ if is_databricks_driver():
 ```
 
 Automatically get the existing Spark Session in Databricks, or via Databricks connect
-if locally
+if locally:
 
 ```py
 from localbricks.spark import get_spark_session
@@ -26,7 +26,7 @@ df.show()
 ```
 
 Uniform API for working with files in the Databricks Workspace or Volumes, whether
-you are developing locally or in a Databricks notebook.
+you are developing locally or in a Databricks notebook:
 
 ```py
 import pandas as pd
