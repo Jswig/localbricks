@@ -1,4 +1,4 @@
-"""Utilities for determining the platform the code is running on"""
+"""Utilities for determining the platform the code is running on."""
 
 import os
 

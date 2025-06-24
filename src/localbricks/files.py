@@ -1,3 +1,5 @@
+"""Databricks file operations."""
+
 import os
 import io
 from contextlib import contextmanager
@@ -10,7 +12,7 @@ from .platform import is_databricks_driver
 
 
 class InaccessibleFileLocationError(ValueError):
-    """Raised when a file path refers to a location that is not accessible via the Databricks API"""
+    """Raised when a path refers to a location inaccessible from outside Databricks."""
 
 
 def _validate_mode(mode: str) -> None:
@@ -22,7 +24,8 @@ def _validate_mode(mode: str) -> None:
     valid_chars = {"r", "w", "+", "b", "t"}
     if not set(mode) <= valid_chars:
         raise ValueError(
-            f"Invalid mode: {mode}. Supported characters are: {', '.join(sorted(valid_chars))}"
+            f"Invalid mode: {mode}."
+            f" Supported characters are: {', '.join(sorted(valid_chars))}"
         )
     if "b" in mode and "t" in mode:
         raise ValueError(

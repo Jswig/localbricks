@@ -1,3 +1,5 @@
+"""Flexible Spark Session creation."""
+
 import importlib.util
 
 from pyspark.sql import SparkSession
@@ -37,7 +39,6 @@ def get_spark_session() -> SparkSession | SparkConnectSession:
     :returns: a Spark Session. This will be either a regular Spark Session or a Spark
         Connect Session, depending on the context.
     """
-
     if is_databricks_driver():
         return SparkSession.builder.getOrCreate()
     elif _databricks_connect_available:
