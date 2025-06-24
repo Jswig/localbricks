@@ -56,9 +56,23 @@ def test_open_file_read_update_text_mode():
     with open_file(file_path, "r+", client=client) as f:
         read_contents = f.read()
         f.write(" This is Badger.")
-    final_contents = client.files.contents[file_path]
+    persisted_contents = client.files.contents[file_path]
     assert read_contents == "Hi, Mr. Fox!"
-    assert final_contents == b"Hi, Mr. Fox! This is Badger."
+    assert persisted_contents == b"Hi, Mr. Fox! This is Badger."
+
+
+def test_open_file_write_update_text_mode():
+    file_path = "/Volumes/my_catalog/my_schema/my_volume/test.txt"
+    client = FakeWorkspaceClient({file_path: b"Hi, Mr. Fox!"})
+    with open_file(file_path, "w+", client=client) as f:
+        first_read_contents = f.read()
+        f.write("This is Badger.")
+        f.seek(0)
+        second_read_contents = f.read()
+    persisted_contents = client.files.contents[file_path]
+    assert first_read_contents == ""
+    assert second_read_contents == "This is Badger."
+    assert persisted_contents == b"This is Badger."
 
 
 def test_open_file_read_binary_mode():
@@ -73,8 +87,8 @@ def test_open_file_write_binary_mode():
     client = FakeWorkspaceClient({})
     with open_file(file_path, "wb", client=client) as f:
         f.write(b"\x48\x69")
-    contents = client.files.contents[file_path]
-    assert contents == b"\x48\x69"
+    persisted_contents = client.files.contents[file_path]
+    assert persisted_contents == b"\x48\x69"
 
 
 def test_open_file_read_update_binary_mode():
@@ -83,6 +97,18 @@ def test_open_file_read_update_binary_mode():
     with open_file(file_path, "rb+", client=client) as f:
         read_contents = f.read()
         f.write(b"\x20\x42")
-    final_contents = client.files.contents[file_path]
+    persisted_contents = client.files.contents[file_path]
     assert read_contents == b"\x48\x69"
-    assert final_contents == b"\x48\x69\x20\x42"
+    assert persisted_contents == b"\x48\x69\x20\x42"
+
+
+def test_open_file_write_update_binary_mode():
+    file_path = "/Volumes/my_catalog/my_schema/my_volume/test.bin"
+    client = FakeWorkspaceClient({file_path: b"\x48\x69"})
+    with open_file(file_path, "wb+", client=client) as f:
+        f.write(b"\x20\x42")
+        f.seek(0)
+        read_contents = f.read()
+    persisted_contents = client.files.contents[file_path]
+    assert read_contents == b"\x20\x42"
+    assert persisted_contents == b"\x20\x42"
