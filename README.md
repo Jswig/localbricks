@@ -8,3 +8,13 @@ machines running against remote Databricks compute.
 
 - [uv](https://docs.astral.sh/uv/)
 - Java Runtime Environment 11 or 17
+
+Run formatting, linting, type checking and tests
+```sh
+sh scripts/build.sh
+```
+
+Build the Sphinx documentation
+```sh
+sh scripts/docs.sh
+```
