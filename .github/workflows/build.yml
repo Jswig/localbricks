@@ -23,3 +23,7 @@ jobs:
         run: |
           chmod +x scripts/build.sh
           ./scripts/build.sh
+      - name: "docs"
+        run: |
+          chmod +x scripts/docs.sh
+          ./scripts/docs.sh
