@@ -1,11 +1,16 @@
 import os
 import io
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Generator, IO, cast
 
 import databricks.sdk
 
 from .platform import is_databricks_driver
+
+
+class InaccessibleFileLocationError(ValueError):
+    """Raised when a file path refers to a location that is not accessible via the Databricks API"""
 
 
 def _validate_mode(mode: str) -> None:
@@ -39,9 +44,22 @@ def _validate_mode(mode: str) -> None:
         )
 
 
-def _validate_file_path(file: str | os.PathLike):
-    if not os.path.isabs(file):
-        raise ValueError(f"File path must be absolute: {file}")
+def _validate_file_path(file_path: str | os.PathLike):
+    file_path = Path(file_path) if not isinstance(file_path, Path) else file_path
+    # The Databricks API requires an absolute path, so to make sure the code is portable
+    # between Databricks and local environments, we can only allow absolute paths.
+    # For the same reason, we only allow paths in the Workspace or Volumes, since these
+    # are accessible via the API (unlike for instance, the local filesystem on a
+    # cluster's driver node).
+    #
+    # file_path.parts[0] is '/'
+    is_accessible_location = file_path.parts[1] in {"Volumes", "Workspace"}
+    if not file_path.is_absolute() or not is_accessible_location:
+        raise InaccessibleFileLocationError(
+            "File path must be an absolute path to a file in the Databricks "
+            "Workspace or a Unity Catalog Volume accessible from that workspace, "
+            f"got {file_path}"
+        )
 
 
 @contextmanager
@@ -59,7 +77,8 @@ def open_file(
     - writes are buffered and uploaded only on context exit
 
     :param file: Path to the file to open
-    :param mode: File mode ('r', 'w', 'a', 'r+', 'w+', 'a+', with optional 'b' for binary)
+    :param mode: File mode ('r', 'w', 'r+', 'w+', with optional 'b' for binary
+        or 't' for text, which is the default)
     :param encoding: Encoding for text files (default: utf-8)
     :param client: Databricks SDK client. If None, creates a new client using the
         default authentication method.
@@ -86,7 +105,7 @@ def open_file(
         is_write_mode = "w" in mode
         is_update_mode = "+" in mode
 
-        if is_read_mode or is_update_mode:
+        if is_read_mode:
             # Download existing file content
             response = client.files.download(file_path)
             if response.contents is None:
