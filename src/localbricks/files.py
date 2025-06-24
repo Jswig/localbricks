@@ -19,28 +19,26 @@ def _validate_mode(mode: str) -> None:
     :param mode: Mode string to validate
     :raises ValueError: If mode is invalid
     """
-    valid_chars = {"r", "w", "a", "+", "b", "t"}
+    valid_chars = {"r", "w", "+", "b", "t"}
     if not set(mode) <= valid_chars:
         raise ValueError(
             f"Invalid mode: {mode}. Supported characters are: {', '.join(sorted(valid_chars))}"
         )
-    # Check for conflicting binary/text modes
     if "b" in mode and "t" in mode:
         raise ValueError(
             f"Invalid mode: {mode}. "
             "Mode must be either binary ('b') or text ('t', default), but not both"
         )
-    # Validate mode combinations
-    base_modes = set(mode) & {"r", "w", "a"}
+    base_modes = set(mode) & {"r", "w"}
     if len(base_modes) > 1:
         raise ValueError(
             f"Invalid mode: {mode}. "
-            "Mode must have exactly one base mode: 'r' (read), 'w' (write), or 'a' (append)"
+            "Mode must have exactly one base mode: 'r' (read), or 'w' (write)"
         )
     if not base_modes:
         raise ValueError(
             f"Invalid mode: {mode}. "
-            "Mode must include a base mode: 'r' (read), 'w' (write), or 'a' (append)"
+            "Mode must include a base mode: 'r' (read), or 'w' (write)"
         )
 
 
@@ -69,20 +67,21 @@ def open_file(
     encoding: str = "utf-8",
     client: databricks.sdk.WorkspaceClient | None = None,
 ) -> Generator[IO, None, None]:
-    """Provides a file-like interface to a file in the Databricks Workspace.
+    """Provides a file-like interface to a file in a Databricks workspace or Volume.
 
     This aims to emulate the built-in 'open()' function. When running against a remote
     Databricks workspace, a few limitations need to be considered:
     - files are loaded entirely into memory
-    - writes are buffered and uploaded only on context exit
+    - writes are buffered and changes are persisted to the Workspce or Volume
+      only on context exit
 
     :param file: Path to the file to open
     :param mode: File mode ('r', 'w', 'r+', 'w+', with optional 'b' for binary
         or 't' for text, which is the default)
-    :param encoding: Encoding for text files (default: utf-8)
+    :param encoding: Encoding for text files
     :param client: Databricks SDK client. If None, creates a new client using the
         default authentication method.
-    :yields: File-like object (StringIO/BytesIO when not on Databricks)
+    :yields: File-like object 
     :raises ValueError: If mode is invalid
     """
     _validate_file_path(file)
@@ -106,7 +105,6 @@ def open_file(
         is_update_mode = "+" in mode
 
         if is_read_mode:
-            # Download existing file content
             response = client.files.download(file_path)
             if response.contents is None:
                 raise ValueError(f"No contents for {file_path}")
@@ -116,7 +114,6 @@ def open_file(
                 text = response.contents.read().decode(encoding)
                 opened_file = io.StringIO(text)
         else:
-            # Create new file buffer
             if is_binary_mode:
                 opened_file = io.BytesIO()
             else:
