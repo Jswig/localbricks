@@ -28,10 +28,6 @@ dev = [
     'setuptools; python_version >= "3.12"',
 ]
 
-interactive = [
-    "ipython>=8.19.0",
-]
-
 [build-system]
 requires = ["flit_core>=3.2"]
 build-backend = "flit_core.buildapi"
