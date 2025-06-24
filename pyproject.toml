@@ -27,6 +27,13 @@ dev = [
     # by 'setuptools' instead. TODO: remove this once this is fixed in Spark release.
     'setuptools; python_version >= "3.12"',
 ]
+docs = [
+    "pydata-sphinx-theme>=0.15.0",
+    "pyspark[connect]==3.5.5",
+    'setuptools; python_version >= "3.12"',
+    "sphinx>=7.0.0",
+    "sphinx-autodoc-typehints>=1.25.0",
+]
 
 [build-system]
 requires = ["flit_core>=3.2"]

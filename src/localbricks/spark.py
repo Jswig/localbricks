@@ -34,8 +34,8 @@ def get_spark_session() -> SparkSession | SparkConnectSession:
     to create a new Session using Databricks Connect and the automatically inferred
     authentication method.
 
-    :returns: a Spark Session. This can be a regular Spark Session or a Spark Connect
-        Session, depending on the context.
+    :returns: a Spark Session. This will be either a regular Spark Session or a Spark
+        Connect Session, depending on the context.
     """
 
     if is_databricks_driver():

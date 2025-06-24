@@ -71,8 +71,9 @@ def open_file(
 
     This aims to emulate the built-in 'open()' function. When running against a remote
     Databricks workspace, a few limitations need to be considered:
+
     - files are loaded entirely into memory
-    - writes are buffered and changes are persisted to the Workspce or Volume
+    - writes are buffered and changes are persisted to the Workspace or Volume
       only on context exit
 
     :param file: Path to the file to open
@@ -81,7 +82,7 @@ def open_file(
     :param encoding: Encoding for text files
     :param client: Databricks SDK client. If None, creates a new client using the
         default authentication method.
-    :yields: File-like object 
+    :yields: File-like object
     :raises ValueError: If mode is invalid
     """
     _validate_file_path(file)
