@@ -1,5 +1,5 @@
-#!/bin/sh
-set -ex
+#!/bin/bash
+set -euo pipefail
 
 repo_root=$(git rev-parse --show-toplevel)
 

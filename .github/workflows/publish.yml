@@ -1,0 +1,67 @@
+name: "Publish"
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      publish_to_testpypi:
+        description: 'Publish to TestPyPI instead of PyPI'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write  # Required for trusted publishing
+
+jobs:
+  publish-package:
+    runs-on: "ubuntu-24.04"
+    environment: 
+      name: ${{ github.event.inputs.publish_to_testpypi == 'true' && 'testpypi' || 'pypi' }}
+      url: ${{ github.event.inputs.publish_to_testpypi == 'true' && 'https://test.pypi.org/p/localbricks' || 'https://pypi.org/p/localbricks' }}
+    steps:
+      - uses: "actions/checkout@v4"
+      - name: "setup uv"
+        uses: "astral-sh/setup-uv@v5"
+      - name: "setup python"
+        uses: "actions/setup-python@v5"
+        with:
+          python-version-file: ".python-version"
+      - name: "publish package"
+        env:
+          TEST_PYPI_API_TOKEN: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          PUBLISH_TO_TESTPYPI: ${{ github.event.inputs.publish_to_testpypi }}
+        run: |
+          chmod +x scripts/publish.sh
+          ./scripts/publish.sh
+
+  publish-docs:
+    runs-on: "ubuntu-24.04"
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: "actions/checkout@v4"
+      - name: "setup uv"
+        uses: "astral-sh/setup-uv@v5"
+      - name: "setup python"
+        uses: "actions/setup-python@v5"
+        with:
+          python-version-file: ".python-version"
+      - name: "build documentation"
+        run: |
+          chmod +x scripts/docs.sh
+          ./scripts/docs.sh
+      - name: "setup pages"
+        uses: "actions/configure-pages@v5"
+      - name: "upload pages artifact"
+        uses: "actions/upload-pages-artifact@v3"
+        with:
+          path: "docs/_build/html"
+      - name: "deploy to github pages"
+        id: deployment
+        uses: "actions/deploy-pages@v4"
