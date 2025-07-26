@@ -8,7 +8,7 @@ on:
       publish_to_testpypi:
         description: 'Publish to TestPyPI instead of PyPI'
         required: false
-        default: false
+        default: true
         type: boolean
 
 permissions:
@@ -30,21 +30,11 @@ jobs:
         uses: "actions/setup-python@v5"
         with:
           python-version-file: ".python-version"
-      - name: "build and test"
-        run: |
-          chmod +x scripts/build.sh
-          ./scripts/build.sh
-      - name: "publish to TestPyPI"
-        if: github.event.inputs.publish_to_testpypi == 'true'
+      - name: "publish package"
         env:
-          UV_PUBLISH_TOKEN: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        run: |
-          uv build
-          uv publish --index-url https://test.pypi.org/legacy/
-      - name: "publish to PyPI"
-        if: github.event.inputs.publish_to_testpypi != 'true'
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          TEST_PYPI_API_TOKEN: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          PUBLISH_TO_TESTPYPI: ${{ github.event.inputs.publish_to_testpypi }}
         run: |
           chmod +x scripts/publish.sh
           ./scripts/publish.sh

@@ -1,4 +1,4 @@
-name: "Build"
+name: "Checks"
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  run-checks:
     runs-on: "ubuntu-24.04"
     steps:
       - uses: "actions/checkout@v4"
@@ -19,11 +19,11 @@ jobs:
         uses: "actions/setup-python@v5"
         with:
           python-version-file: ".python-version"
-      - name: "build"
+      - name: "run checks"
         run: |
-          chmod +x scripts/build.sh
-          ./scripts/build.sh
-      - name: "docs"
+          chmod +x scripts/checks.sh
+          ./scripts/checks.sh
+      - name: "build docs"
         run: |
           chmod +x scripts/docs.sh
           ./scripts/docs.sh
